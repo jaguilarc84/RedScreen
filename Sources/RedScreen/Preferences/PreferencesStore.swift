@@ -62,4 +62,28 @@ final class PreferencesStore {
         get { UInt32(defaults.object(forKey: Key.hotKeyModifiers) as? Int ?? Int(Self.defaultHotKeyModifiers)) }
         set { defaults.set(Int(newValue), forKey: Key.hotKeyModifiers) }
     }
+
+    /// Custom warmth/brightness for Day/Evening/Night, falling back to each
+    /// mode's factory defaults until the user overrides it.
+    func preset(for mode: FilterMode) -> FilterPreset {
+        guard
+            let stored = defaults.dictionary(forKey: presetKey(for: mode)),
+            let warmth = stored["warmth"] as? Double,
+            let brightness = stored["brightness"] as? Double
+        else {
+            return mode.defaultPreset
+        }
+        return FilterPreset(warmth: CGFloat(warmth), brightness: CGFloat(brightness))
+    }
+
+    func setPreset(_ preset: FilterPreset, for mode: FilterMode) {
+        defaults.set(
+            ["warmth": Double(preset.warmth), "brightness": Double(preset.brightness)],
+            forKey: presetKey(for: mode)
+        )
+    }
+
+    private func presetKey(for mode: FilterMode) -> String {
+        "redscreen.preset.\(mode.rawValue)"
+    }
 }

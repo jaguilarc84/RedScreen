@@ -74,7 +74,31 @@ final class FilterEngine: ObservableObject {
         guard mode != .custom else { return }
         activeMode = mode
         preferences.activeMode = mode
-        animateTransition(to: mode.preset)
+        animateTransition(to: preferences.preset(for: mode))
+    }
+
+    func preset(for mode: FilterMode) -> FilterPreset {
+        preferences.preset(for: mode)
+    }
+
+    /// Persists a custom warmth/brightness pair for a Day/Evening/Night
+    /// preset. If that mode is currently active, applies it immediately.
+    func updatePreset(warmth: CGFloat, brightness: CGFloat, for mode: FilterMode) {
+        guard mode != .custom else { return }
+        preferences.setPreset(FilterPreset(warmth: warmth, brightness: brightness), for: mode)
+
+        guard activeMode == mode else { return }
+        transitionTimer?.invalidate()
+        self.warmth = warmth
+        self.brightness = brightness
+        preferences.warmth = warmth
+        preferences.brightness = brightness
+        applyCurrentState()
+    }
+
+    func resetPreset(for mode: FilterMode) {
+        let defaultPreset = mode.defaultPreset
+        updatePreset(warmth: defaultPreset.warmth, brightness: defaultPreset.brightness, for: mode)
     }
 
     func setExcludedDisplay(_ displayID: CGDirectDisplayID, excluded: Bool) {

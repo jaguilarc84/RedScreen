@@ -50,28 +50,8 @@ struct FilterPopoverView: View {
 
     private var slidersSection: some View {
         VStack(spacing: 12) {
-            sliderRow(title: "CALIDEZ", value: engine.warmth, range: 0...1) { engine.setWarmth($0) }
-            sliderRow(title: "BRILLO", value: engine.brightness, range: 0.15...1) { engine.setBrightness($0) }
-        }
-    }
-
-    private func sliderRow(
-        title: String,
-        value: CGFloat,
-        range: ClosedRange<CGFloat>,
-        onChange: @escaping (CGFloat) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            Slider(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { onChange(CGFloat($0)) }
-                ),
-                in: Double(range.lowerBound)...Double(range.upperBound)
-            )
+            LabeledSlider(title: "CALIDEZ", value: engine.warmth, range: 0...1) { engine.setWarmth($0) }
+            LabeledSlider(title: "BRILLO", value: engine.brightness, range: 0.15...1) { engine.setBrightness($0) }
         }
     }
 
