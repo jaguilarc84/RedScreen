@@ -71,6 +71,26 @@ esquema `RedScreen`. Para distribuirla como `.app` firmada, crea un target
 de tipo "App" en Xcode y arrastra los archivos de `Sources/RedScreen` dentro
 (Xcode gestionará el Info.plist y el firmado por ti).
 
+## Ícono de la app
+
+`Scripts/generate_icon.swift` dibuja el ícono (gradiente rosa/púrpura de
+marca + el mismo sol que el ícono de la barra de menús) directamente con
+AppKit, en todas las resoluciones que macOS necesita:
+
+```bash
+swift Scripts/generate_icon.swift
+iconutil -c icns AppIcon.iconset -o Resources/AppIcon.icns
+./Scripts/build_app.sh
+```
+
+`build_app.sh` copia `Resources/AppIcon.icns` al bundle automáticamente si
+existe (y avisa si falta). Para verlo reflejado también hay que refrescar el
+caché de íconos de Finder:
+
+```bash
+killall Finder
+```
+
 ## Limitaciones conocidas / decisiones deliberadas
 
 - **No se pudo compilar ni ejecutar en este entorno**: el desarrollo se hizo
@@ -91,3 +111,6 @@ de tipo "App" en Xcode y arrastra los archivos de `Sources/RedScreen` dentro
   componentes.
 - **Inicio automático** solo está implementado para macOS 13+ (`SMAppService`).
   En 11–12 necesitarías un target auxiliar de tipo Login Item.
+- **`Scripts/generate_icon.swift` tampoco se pudo probar aquí** (mismo motivo:
+  sin Xcode/Swift en este contenedor). Si algo falla al correrlo, pégame el
+  error tal cual salga en Terminal.

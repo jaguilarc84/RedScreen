@@ -21,5 +21,12 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 cp "$BIN_PATH/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 cp "Resources/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
+if [ -f "Resources/AppIcon.icns" ]; then
+    cp "Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+else
+    echo "Aviso: no existe Resources/AppIcon.icns, la app quedará sin ícono."
+    echo "Genera uno con: swift Scripts/generate_icon.swift && iconutil -c icns AppIcon.iconset -o Resources/AppIcon.icns"
+fi
+
 echo "Built $APP_BUNDLE"
 echo "Run it with: open \"$APP_BUNDLE\""
