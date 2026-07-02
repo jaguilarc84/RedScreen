@@ -23,7 +23,7 @@ struct FilterPopoverView: View {
             Spacer()
             Text(engine.isEnabled ? "Activo" : "Desactivado")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
         }
     }
 
@@ -43,7 +43,7 @@ struct FilterPopoverView: View {
                         )
                     )
                 )
-                .foregroundStyle(.white)
+                .foregroundColor(.white)
         }
         .buttonStyle(.plain)
     }
@@ -64,7 +64,7 @@ struct FilterPopoverView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
             Slider(
                 value: Binding(
                     get: { Double(value) },
@@ -91,7 +91,7 @@ struct FilterPopoverView: View {
         HStack {
             Text("\u{2303}\u{2325}Z activa/desactiva")
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
             Spacer()
             Button(action: onOpenPreferences) {
                 Image(systemName: "gearshape")

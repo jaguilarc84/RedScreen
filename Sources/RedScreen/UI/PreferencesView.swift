@@ -31,7 +31,7 @@ struct PreferencesView: View {
 
             Text("Atajo global: \u{2303}\u{2325}Z")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
         }
         .padding(20)
         .frame(width: 300, height: 220)

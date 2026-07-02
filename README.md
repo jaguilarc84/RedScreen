@@ -84,9 +84,10 @@ de tipo "App" en Xcode y arrastra los archivos de `Sources/RedScreen` dentro
   no hay forma de verificar esa integración sin hardware físico y sin poder
   compilar aquí, así que se documenta en vez de improvisarse. El slider de
   brillo sí funciona en todas las pantallas vía gamma de software.
-- **Mínimo macOS 11**, no 10.15 como en la página de referencia: los iconos
-  de la barra de menús usan SF Symbols (`NSImage(systemSymbolName:)`), que
-  requieren macOS 11+. Soportar 10.15 exigiría empaquetar iconos bitmap
-  propios.
+- **Mínimo macOS 12**, no 10.15 como en la página de referencia: los iconos
+  de la barra de menús usan SF Symbols (`NSImage(systemSymbolName:)`, macOS
+  11+) y la interfaz usa `Section`/`.tint` de SwiftUI (macOS 12+). Soportar
+  10.15 exigiría empaquetar iconos bitmap propios y una UI sin esos
+  componentes.
 - **Inicio automático** solo está implementado para macOS 13+ (`SMAppService`).
   En 11–12 necesitarías un target auxiliar de tipo Login Item.
