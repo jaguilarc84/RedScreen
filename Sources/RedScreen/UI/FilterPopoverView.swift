@@ -4,79 +4,128 @@ struct FilterPopoverView: View {
     @ObservedObject var engine: FilterEngine
     let onOpenPreferences: () -> Void
 
+    private let warmthColor = Color(red: 0.95, green: 0.38, blue: 0.27)
+
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 18) {
             header
-            zapButton
             slidersSection
+            pwmStatusRow
             modeButtons
-            footer
+            activateButton
+            Text("\u{2303}\u{2325}Z activa/desactiva")
+                .font(.caption2)
+                .foregroundColor(.secondary)
         }
-        .padding(16)
-        .frame(width: 280)
+        .padding(20)
+        .frame(width: 320)
+        .background(Color(red: 0.08, green: 0.08, blue: 0.10))
     }
 
     private var header: some View {
         HStack {
-            Text("RedScreen")
-                .font(.headline)
             Spacer()
-            Text(engine.isEnabled ? "Activo" : "Desactivado")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Button(action: onOpenPreferences) {
+                Image(systemName: "gearshape.fill")
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
         }
-    }
-
-    private var zapButton: some View {
-        Button(action: engine.toggle) {
-            Text("ZAP")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .frame(width: 84, height: 84)
-                .background(
-                    Circle().fill(
-                        LinearGradient(
-                            colors: engine.isEnabled
-                                ? [.pink, .purple]
-                                : [Color.gray.opacity(0.35), Color.gray.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                )
-                .foregroundColor(.white)
-        }
-        .buttonStyle(.plain)
     }
 
     private var slidersSection: some View {
-        VStack(spacing: 12) {
-            LabeledSlider(title: "CALIDEZ", value: engine.warmth, range: 0...1) { engine.setWarmth($0) }
-            LabeledSlider(title: "BRILLO", value: engine.brightness, range: 0.15...1) { engine.setBrightness($0) }
+        HStack(spacing: 40) {
+            VStack(spacing: 14) {
+                Text("CALIDEZ")
+                    .font(.headline)
+                    .foregroundColor(warmthColor)
+                FaderSlider(value: engine.warmth, range: 0...1, tint: warmthColor) {
+                    engine.setWarmth($0)
+                }
+                ValueBadge(text: kelvinText(for: engine.warmth), tint: warmthColor)
+            }
+            VStack(spacing: 14) {
+                Text("BRILLO")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                FaderSlider(value: engine.brightness, range: 0.15...1, tint: .white) {
+                    engine.setBrightness($0)
+                }
+                ValueBadge(text: percentText(for: engine.brightness), tint: .white)
+            }
         }
     }
 
+    private var pwmStatusRow: some View {
+        let softwareDimmingActive = engine.isEnabled && engine.brightness < 1.0
+        return HStack {
+            Circle()
+                .fill(softwareDimmingActive ? Color.green : Color.gray.opacity(0.5))
+                .frame(width: 8, height: 8)
+            Text("MODO SEGURO PWM")
+                .font(.caption2.bold())
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(softwareDimmingActive ? "ENCENDIDO" : "APAGADO")
+                .font(.caption2.bold())
+                .foregroundColor(softwareDimmingActive ? .green : .secondary)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.05)))
+    }
+
     private var modeButtons: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             ForEach([FilterMode.day, .evening, .night], id: \.self) { mode in
                 Button(mode.title.uppercased()) {
                     engine.selectMode(mode)
                 }
-                .buttonStyle(.bordered)
-                .tint(engine.activeMode == mode ? .accentColor : .gray)
+                .font(.caption.bold())
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(engine.activeMode == mode ? Color.white.opacity(0.16) : Color.white.opacity(0.05))
+                )
+                .foregroundColor(engine.activeMode == mode ? .white : .secondary)
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private var footer: some View {
-        HStack {
-            Text("\u{2303}\u{2325}Z activa/desactiva")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            Spacer()
-            Button(action: onOpenPreferences) {
-                Image(systemName: "gearshape")
+    private var activateButton: some View {
+        Button(action: engine.toggle) {
+            HStack(spacing: 8) {
+                Image(systemName: "bolt.fill")
+                Text(engine.isEnabled ? "DESACTIVAR" : "ACTIVAR")
+                    .font(.headline)
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
         }
+        .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    engine.isEnabled
+                        ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple], startPoint: .leading, endPoint: .trailing))
+                        : AnyShapeStyle(Color.white.opacity(0.08))
+                )
+        )
+        .foregroundColor(engine.isEnabled ? .white : .secondary)
+    }
+
+    private func kelvinText(for warmth: CGFloat) -> String {
+        let kelvin = Int((6500 - warmth * 5500).rounded())
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = ","
+        let formatted = formatter.string(from: NSNumber(value: kelvin)) ?? "\(kelvin)"
+        return "\(formatted)K"
+    }
+
+    private func percentText(for brightness: CGFloat) -> String {
+        "\(Int((brightness * 100).rounded()))%"
     }
 }
