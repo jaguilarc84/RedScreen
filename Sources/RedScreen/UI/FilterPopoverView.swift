@@ -24,12 +24,18 @@ struct FilterPopoverView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .top, spacing: 8) {
             Circle()
                 .fill(engine.isEnabled ? accentColor : Color.gray.opacity(0.4))
                 .frame(width: 8, height: 8)
-            Text("RedScreen")
-                .font(.system(size: 13, weight: .semibold))
+                .padding(.top, 4)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("RedScreen")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("by Make It Happen LAB")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
             Spacer()
             Button(action: onOpenPreferences) {
                 Image(systemName: "gearshape")
