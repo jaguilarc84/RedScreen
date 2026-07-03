@@ -20,6 +20,7 @@ struct FilterPopoverView: View {
         .padding(18)
         .frame(width: 280)
         .background(Color(red: 0.09, green: 0.09, blue: 0.11))
+        .preferredColorScheme(.dark)
     }
 
     private var header: some View {
@@ -73,6 +74,7 @@ struct FilterPopoverView: View {
                 value: Binding(get: { Double(engine.brightness) }, set: { engine.setBrightness(CGFloat($0)) }),
                 in: 0.15...1
             )
+            .tint(Color(white: 0.85))
 
             if engine.isEnabled && engine.brightness < 1.0 {
                 Text("Atenuando por software, sin bajar el brillo real")
