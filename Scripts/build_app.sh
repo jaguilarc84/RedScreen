@@ -4,7 +4,8 @@
 # not an .xcodeproj, so this replaces Xcode's usual app-bundling step).
 set -euo pipefail
 
-APP_NAME="RedScreen"
+APP_NAME="RedScreen"                                  # binary / process name
+APP_DISPLAY_NAME="RedScreen by Make It Happen LAB"    # .app bundle name shown in Finder
 BUILD_CONFIG="release"
 
 cd "$(dirname "$0")/.."
@@ -12,7 +13,7 @@ cd "$(dirname "$0")/.."
 swift build -c "$BUILD_CONFIG"
 
 BIN_PATH="$(swift build -c "$BUILD_CONFIG" --show-bin-path)"
-APP_BUNDLE="$BIN_PATH/$APP_NAME.app"
+APP_BUNDLE="$BIN_PATH/$APP_DISPLAY_NAME.app"
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"

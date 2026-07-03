@@ -5,7 +5,7 @@
     <key>CFBundleName</key>
     <string>RedScreen</string>
     <key>CFBundleDisplayName</key>
-    <string>RedScreen</string>
+    <string>RedScreen by Make It Happen LAB</string>
     <key>CFBundleIdentifier</key>
     <string>com.redscreen.app</string>
     <key>CFBundleExecutable</key>
@@ -13,9 +13,9 @@
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>
-    <string>1.0.0</string>
+    <string>1.0</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>1.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSUIElement</key>
@@ -23,6 +23,6 @@
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>© 2026 RedScreen</string>
+    <string>© 2026 Make It Happen LAB</string>
 </dict>
 </plist>
