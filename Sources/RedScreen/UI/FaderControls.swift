@@ -14,9 +14,10 @@ struct TickMarks: View {
     }
 }
 
-/// A vertical fader (SwiftUI's Slider is horizontal-only on macOS, so this
-/// rotates one -90° and re-constrains its layout box to read as vertical,
-/// with the minimum at the bottom and the maximum at the top).
+/// A vertical fader with a hand-drawn thumb (a pill-shaped handle with a
+/// colored grip line), since SwiftUI's native `Slider` has no public API to
+/// restyle its knob and its default knob reads as barely-there on a dark
+/// background. Tracks drags anywhere along the rail, not just on the thumb.
 struct FaderSlider: View {
     let value: CGFloat
     let range: ClosedRange<CGFloat>
@@ -24,23 +25,64 @@ struct FaderSlider: View {
     let onChange: (CGFloat) -> Void
 
     private let trackLength: CGFloat = 170
+    private let thumbWidth: CGFloat = 52
+    private let thumbHeight: CGFloat = 30
 
     var body: some View {
         HStack(spacing: 10) {
             TickMarks()
-            Slider(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { onChange(CGFloat($0)) }
-                ),
-                in: Double(range.lowerBound)...Double(range.upperBound)
-            )
-            .tint(tint)
-            .frame(width: trackLength)
-            .rotationEffect(.degrees(-90))
-            .frame(width: 28, height: trackLength)
+            GeometryReader { geo in
+                let height = geo.size.height
+                ZStack(alignment: .top) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.white.opacity(0.25))
+                        .frame(width: 3)
+                        .frame(maxWidth: .infinity)
+
+                    thumb
+                        .position(x: geo.size.width / 2, y: thumbCenterY(in: height))
+                }
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { drag in
+                            updateValue(fromY: drag.location.y, height: height)
+                        }
+                )
+            }
+            .frame(width: thumbWidth, height: trackLength)
             TickMarks()
         }
+    }
+
+    private var thumb: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color(white: 0.24))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            )
+            .overlay(
+                Capsule()
+                    .fill(tint)
+                    .frame(width: thumbWidth * 0.45, height: 3)
+            )
+            .frame(width: thumbWidth, height: thumbHeight)
+            .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
+    }
+
+    private func thumbCenterY(in height: CGFloat) -> CGFloat {
+        let span = range.upperBound - range.lowerBound
+        let fraction = span > 0 ? (value - range.lowerBound) / span : 0
+        return (1 - fraction) * height
+    }
+
+    private func updateValue(fromY y: CGFloat, height: CGFloat) {
+        guard height > 0 else { return }
+        let span = range.upperBound - range.lowerBound
+        let clampedY = min(max(y, 0), height)
+        let fraction = 1 - (clampedY / height)
+        onChange(range.lowerBound + fraction * span)
     }
 }
 
