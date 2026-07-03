@@ -91,6 +91,30 @@ caché de íconos de Finder:
 killall Finder
 ```
 
+## Distribuir a otras personas (.dmg)
+
+`Scripts/build_dmg.sh` compila la app y arma un `.dmg` estándar (con el
+`.app` y un acceso directo a Aplicaciones, el "arrastra para instalar" de
+toda la vida), usando solo `hdiutil` (viene con macOS, no necesita cuenta de
+desarrollador):
+
+```bash
+./Scripts/build_dmg.sh
+```
+
+Deja el resultado en `dist/RedScreen-1.0.dmg`. Compártelo por donde quieras
+(AirDrop, Drive, etc.) — quien lo reciba hace doble clic, arrastra
+"RedScreen by Make It Happen LAB" al ícono de Aplicaciones, y listo.
+
+**Gatekeeper**: como la app no está firmada con un certificado de Apple
+Developer ni notarizada, cada persona que la instale va a ver el aviso de
+"no se puede verificar el desarrollador" la primera vez que la abra. Tiene
+que hacer clic derecho → Abrir (en vez de doble clic) esa primera vez, o
+correr `xattr -cr` sobre la app. Para eliminar ese aviso por completo hace
+falta firmar y notarizar con una cuenta de Apple Developer (US$99/año) —
+puedo guiarte por ese proceso si en algún momento quieres distribuirla sin
+esa fricción.
+
 ## Limitaciones conocidas / decisiones deliberadas
 
 - **No se pudo compilar ni ejecutar en este entorno**: el desarrollo se hizo
@@ -111,6 +135,7 @@ killall Finder
   componentes.
 - **Inicio automático** solo está implementado para macOS 13+ (`SMAppService`).
   En 11–12 necesitarías un target auxiliar de tipo Login Item.
-- **`Scripts/generate_icon.swift` tampoco se pudo probar aquí** (mismo motivo:
-  sin Xcode/Swift en este contenedor). Si algo falla al correrlo, pégame el
-  error tal cual salga en Terminal.
+- **`Scripts/generate_icon.swift` y `Scripts/build_dmg.sh` tampoco se
+  pudieron probar aquí** (mismo motivo: sin Xcode/Swift/`hdiutil` en este
+  contenedor). Si algo falla al correrlos, pégame el error tal cual salga
+  en Terminal.
