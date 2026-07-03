@@ -4,116 +4,127 @@ struct FilterPopoverView: View {
     @ObservedObject var engine: FilterEngine
     let onOpenPreferences: () -> Void
 
-    private let warmthColor = Color(red: 0.95, green: 0.38, blue: 0.27)
+    private let accentColor = Color(red: 1.0, green: 0.23, blue: 0.19)
 
     var body: some View {
-        VStack(spacing: 18) {
+        VStack(alignment: .leading, spacing: 16) {
             header
-            slidersSection
-            pwmStatusRow
-            modeButtons
+            VStack(spacing: 14) {
+                warmthRow
+                brightnessRow
+            }
+            separator
+            modePicker
             activateButton
-            Text("\u{2303}\u{2325}Z activa/desactiva")
-                .font(.caption2)
-                .foregroundColor(.secondary)
         }
-        .padding(20)
-        .frame(width: 320)
-        .background(Color(red: 0.08, green: 0.08, blue: 0.10))
+        .padding(18)
+        .frame(width: 280)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.11))
     }
 
     private var header: some View {
-        HStack {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(engine.isEnabled ? accentColor : Color.gray.opacity(0.4))
+                .frame(width: 8, height: 8)
+            Text("RedScreen")
+                .font(.system(size: 13, weight: .semibold))
             Spacer()
             Button(action: onOpenPreferences) {
-                Image(systemName: "gearshape.fill")
+                Image(systemName: "gearshape")
+                    .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
         }
     }
 
-    private var slidersSection: some View {
-        HStack(spacing: 40) {
-            VStack(spacing: 14) {
-                Text("CALIDEZ")
-                    .font(.headline)
-                    .foregroundColor(warmthColor)
-                FaderSlider(value: engine.warmth, range: 0...1, tint: warmthColor) {
-                    engine.setWarmth($0)
-                }
-                ValueBadge(text: kelvinText(for: engine.warmth), tint: warmthColor)
+    private var warmthRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Label("Calidez", systemImage: "flame.fill")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(kelvinText(for: engine.warmth))
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundColor(.secondary)
             }
-            VStack(spacing: 14) {
-                Text("BRILLO")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                FaderSlider(value: engine.brightness, range: 0.15...1, tint: .white) {
-                    engine.setBrightness($0)
-                }
-                ValueBadge(text: percentText(for: engine.brightness), tint: .white)
+            Slider(
+                value: Binding(get: { Double(engine.warmth) }, set: { engine.setWarmth(CGFloat($0)) }),
+                in: 0...1
+            )
+            .tint(accentColor)
+        }
+    }
+
+    private var brightnessRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Label("Brillo", systemImage: "sun.max.fill")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(percentText(for: engine.brightness))
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundColor(.secondary)
+            }
+            Slider(
+                value: Binding(get: { Double(engine.brightness) }, set: { engine.setBrightness(CGFloat($0)) }),
+                in: 0.15...1
+            )
+
+            if engine.isEnabled && engine.brightness < 1.0 {
+                Text("Atenuando por software, sin bajar el brillo real")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
             }
         }
     }
 
-    private var pwmStatusRow: some View {
-        let softwareDimmingActive = engine.isEnabled && engine.brightness < 1.0
-        return HStack {
-            Circle()
-                .fill(softwareDimmingActive ? Color.green : Color.gray.opacity(0.5))
-                .frame(width: 8, height: 8)
-            Text("MODO SEGURO PWM")
-                .font(.caption2.bold())
-                .foregroundColor(.secondary)
-            Spacer()
-            Text(softwareDimmingActive ? "ENCENDIDO" : "APAGADO")
-                .font(.caption2.bold())
-                .foregroundColor(softwareDimmingActive ? .green : .secondary)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.05)))
+    private var separator: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 1)
     }
 
-    private var modeButtons: some View {
-        HStack(spacing: 10) {
-            ForEach([FilterMode.day, .evening, .night], id: \.self) { mode in
-                Button(mode.title.uppercased()) {
-                    engine.selectMode(mode)
-                }
-                .font(.caption.bold())
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(engine.activeMode == mode ? Color.white.opacity(0.16) : Color.white.opacity(0.05))
-                )
-                .foregroundColor(engine.activeMode == mode ? .white : .secondary)
-                .buttonStyle(.plain)
-            }
+    private var modePicker: some View {
+        Picker(
+            "",
+            selection: Binding(
+                get: { engine.activeMode },
+                set: { engine.selectMode($0) }
+            )
+        ) {
+            Text("Día").tag(FilterMode.day)
+            Text("Tarde").tag(FilterMode.evening)
+            Text("Noche").tag(FilterMode.night)
         }
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 
     private var activateButton: some View {
         Button(action: engine.toggle) {
             HStack(spacing: 8) {
-                Image(systemName: "bolt.fill")
-                Text(engine.isEnabled ? "DESACTIVAR" : "ACTIVAR")
-                    .font(.headline)
+                Image(systemName: engine.isEnabled ? "sun.min.fill" : "sun.max.fill")
+                Text(engine.isEnabled ? "Desactivar filtro" : "Activar filtro")
+                    .fontWeight(.semibold)
+                Spacer()
+                Text("\u{2303}\u{2325}Z")
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .opacity(0.6)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(
-                    engine.isEnabled
-                        ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple], startPoint: .leading, endPoint: .trailing))
-                        : AnyShapeStyle(Color.white.opacity(0.08))
-                )
+            Capsule().fill(
+                engine.isEnabled ? AnyShapeStyle(accentColor) : AnyShapeStyle(Color.white.opacity(0.08))
+            )
         )
-        .foregroundColor(engine.isEnabled ? .white : .secondary)
+        .foregroundColor(engine.isEnabled ? .white : .primary)
     }
 
     private func kelvinText(for warmth: CGFloat) -> String {
