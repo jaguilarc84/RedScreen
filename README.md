@@ -73,9 +73,23 @@ de tipo "App" en Xcode y arrastra los archivos de `Sources/RedScreen` dentro
 
 ## Ícono de la app
 
-`Scripts/generate_icon.swift` dibuja el ícono (gradiente rosa/púrpura de
-marca + el mismo sol que el ícono de la barra de menús) directamente con
-AppKit, en todas las resoluciones que macOS necesita:
+Dos formas de generarlo, según si quieres dibujarlo con código o partir de
+una imagen ya hecha:
+
+**Desde una imagen (`Resources/icon_source.png`)**: guarda ahí tu ícono
+(idealmente 1024×1024, cuadrado) y corre:
+
+```bash
+./Scripts/build_icon_from_png.sh
+./Scripts/build_app.sh
+```
+
+Usa `sips` (viene con macOS) para generar cada resolución y `iconutil` para
+armar el `.icns`.
+
+**Dibujado por código** (sin imagen de por medio): `Scripts/generate_icon.swift`
+dibuja el ícono (gradiente rosa/púrpura de marca + el mismo sol que el ícono
+de la barra de menús) directamente con AppKit:
 
 ```bash
 swift Scripts/generate_icon.swift
@@ -83,9 +97,9 @@ iconutil -c icns AppIcon.iconset -o Resources/AppIcon.icns
 ./Scripts/build_app.sh
 ```
 
-`build_app.sh` copia `Resources/AppIcon.icns` al bundle automáticamente si
-existe (y avisa si falta). Para verlo reflejado también hay que refrescar el
-caché de íconos de Finder:
+Cualquiera de los dos dejará `Resources/AppIcon.icns`, que `build_app.sh`
+copia al bundle automáticamente si existe (y avisa si falta). Para verlo
+reflejado también hay que refrescar el caché de íconos de Finder:
 
 ```bash
 killall Finder
@@ -135,7 +149,7 @@ esa fricción.
   componentes.
 - **Inicio automático** solo está implementado para macOS 13+ (`SMAppService`).
   En 11–12 necesitarías un target auxiliar de tipo Login Item.
-- **`Scripts/generate_icon.swift` y `Scripts/build_dmg.sh` tampoco se
-  pudieron probar aquí** (mismo motivo: sin Xcode/Swift/`hdiutil` en este
-  contenedor). Si algo falla al correrlos, pégame el error tal cual salga
-  en Terminal.
+- **`Scripts/generate_icon.swift`, `Scripts/build_icon_from_png.sh` y
+  `Scripts/build_dmg.sh` tampoco se pudieron probar aquí** (mismo motivo:
+  sin Xcode/Swift/`sips`/`hdiutil` en este contenedor). Si algo falla al
+  correrlos, pégame el error tal cual salga en Terminal.
